@@ -3,10 +3,19 @@ from textblob import TextBlob
 import re
 
 def clean_text(text: str) -> str:
-    """Remove special characters, URLs, and extra spaces."""
-    text = re.sub(r'http\S+|www\.\S+', '', text)  # Remove URLs
-    text = re.sub(r'[^a-zA-Z0-9 ]', '', text)  # Remove special characters
-    text = re.sub(r'\s+', ' ', text).strip()  # Remove extra spaces
+    """
+    Remove special characters and extra spaces, but replace URLs with their domain names.
+    """
+    # Replace URLs with the domain name.
+    # This regex matches http or https URLs, optionally starting with www, and captures the domain.
+    text = re.sub(r'https?://(?:www\.)?([^/\s]+)', r'\1', text)
+    
+    # In case there are any remaining URLs starting with "www.", remove them or replace as needed.
+    text = re.sub(r'www\.(\S+)', r'\1', text)
+    
+    # Remove any additional special characters, while preserving basic punctuation.
+    text = re.sub(r'[^a-zA-Z0-9 .,!?]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 def tokenize_text(text: str):
