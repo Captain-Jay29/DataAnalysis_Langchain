@@ -84,12 +84,13 @@ def get_clean_content(url):
     encoded_url = quote(url, safe='')
     api_endpoint = f"https://r.jina.ai/{encoded_url}"
     
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "X-Engine": "direct"
-    }
+    # headers = {
+    #     "Authorization": f"Bearer {API_KEY}",
+    #     "X-Engine": "direct"
+    # }
     
-    response = requests.get(api_endpoint, headers=headers)
+    # response = requests.get(api_endpoint, headers=headers)
+    response = requests.get(api_endpoint)
     if response.status_code == 200:
         return response.text
     else:

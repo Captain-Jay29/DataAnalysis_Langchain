@@ -77,6 +77,12 @@ if __name__ == "__main__":
             "summary": "This is a summary of article 2.",
             "query": "New Tariff rules by Donald Trump",
             "tags": ["Trump", "Tariff"]
+        },
+        {
+            "url": "https://www.voanews.com/a/wto-holds-constructive-talks-after-china-condemns-trump-tariffs/7981049.html",
+            "summary": "WTO holds 'constructive' talks after China condemns Trump tariffs. China accused the U.S. of imposing 'tariff shocks' that could upend the global trading system. Washington dismissed China's comments as hypocritical. Trump has announced sweeping 10% tariffs on all Chinese imports, prompting Beijing to respond with retaliatory tariffs.",
+            "query": "What are the new Tariff rules by Donald Trump affecting China and the US?",
+            "tags": ["tariff", "trump", "donald", "china"]
         }
     ]
     store_articles(test_articles)
