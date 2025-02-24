@@ -12,9 +12,9 @@ from get_data_revised import get_data_and_summarize
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     
 # Define a threshold for minimum number of articles from the DB
-MIN_ARTICLE_THRESHOLD = 3
+MIN_ARTICLE_THRESHOLD = 7
 
-def supplement_data(query: str, num_results: int = 5) -> List[Dict]:
+def supplement_data(query: str, num_results: int = 7) -> List[Dict]:
     """
     Supplement data by fetching additional articles using get_data_and_summarize.
     Returns a list of article dictionaries.
@@ -40,28 +40,22 @@ def collate_article_summaries(articles: List[Dict]) -> str:
             collated += f"Article {i+1} (URL: {url}):\n{summary}\n\n"
     return collated
 
-def generate_analysis_report(context: str, query: str) -> str:
-    """
-    Generate a detailed report using OpenAI's ChatCompletion API.
-    The prompt instructs the model to produce a well-formatted report with separate sections:
-      1. Executive Summary
-      2. Detailed Analysis
-      3. Supplementary Insights
-      4. Conclusion
-    """
-    prompt = f"""
-You are an expert data analyst. Based on the following information extracted from various articles:
-{context}
+def generate_analysis_report(context: str, query: str, extra_instructions: str = "") -> str:
+    base_prompt = f"""
+    You are an expert data analyst. Based on the following information extracted from various reputable sources:
+    {context}
 
-Generate a comprehensive and well-formatted report addressing the query: "{query}".
-Your report should have the following sections:
-1. Executive Summary: Provide a brief overview of the main findings.
-2. Detailed Analysis: Offer a thorough analysis answering the query.
-3. Supplementary Insights: Include additional insights, such as historical trends, contextual factors, or policy implications.
-4. Conclusion: Summarize the overall insights.
+    Generate a comprehensive and deeply researched report addressing the query: "{query}". Your report should:
+    1. **Executive Summary:** Present a concise overview of the key findings.
+    2. **Detailed Analysis:** Provide an in-depth analysis that synthesizes the information, identifies underlying trends, and explains the significance of the data.
+    3. **Supplementary Insights:** Offer additional insights such as comparisons with historical data, contextual factors influencing the trends, and potential implications for future decisions.
+    4. **Conclusion:** Summarize the overall insights and propose actionable recommendations or considerations.
 
-Ensure that the report is clearly structured with section headers.
-"""
+    Ensure that the report is clear, logically organized, and written in a tone appropriate for strategic decision-making rather than journalistic reporting.
+    """
+    # Append any extra instructions if provided
+    prompt = base_prompt + "\n" + extra_instructions if extra_instructions else base_prompt
+
     try:
         # Using OpenAI's ChatCompletion via the OpenAI package
         from openai import OpenAI
@@ -81,7 +75,7 @@ Ensure that the report is clearly structured with section headers.
         logging.error("Error generating analysis report: " + str(e))
         return "Error generating report."
 
-def generate_report_for_query(query: str) -> str:
+def generate_report_for_query(query: str, extra_instructions: str = "") -> str:
     """
     Orchestrates the report generation process:
       1. Extract tags from the query.
@@ -108,13 +102,17 @@ def generate_report_for_query(query: str) -> str:
         supplementary_articles = supplement_data(query, num_results=5)
         # Avoid duplicates by filtering out articles with URLs already in the database
         existing_urls = set(article["url"] for article in articles_from_db)
-        supplementary_articles = [article for article in supplementary_articles if article["url"] not in existing_urls]
+        # Filter out articles with invalid URLs (e.g., those not starting with "http")
+        supplementary_articles = [
+            article for article in supplementary_articles 
+            if article.get("url", "").startswith("http") and article["url"] not in existing_urls
+        ]
         
         # Ensure each supplemental article has "query" and "tags" set
         for article in supplementary_articles:
-            if "query" not in article or not article["query"]:
+            if not article.get("query"):
                 article["query"] = query
-            if "tags" not in article or not article["tags"]:
+            if not article.get("tags"):
                 article["tags"] = tags
         
         # Append the new supplemental articles to the database
@@ -133,8 +131,10 @@ def generate_report_for_query(query: str) -> str:
     context = collate_article_summaries(articles)
     
     # Step 5: Generate the detailed report using OpenAI
-    report = generate_analysis_report(context, query)
+    report = generate_analysis_report(context, query, extra_instructions)
     return report
+
+
 
 # Optional: Main block for testing
 if __name__ == "__main__":

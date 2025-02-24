@@ -16,3 +16,6 @@ Phase1/data_processing.py
 Phase1/output.txt
 Phase1/misinformation_detection.py
 structured_output.txt
+Phase1/get_data_and_summarize.py
+Phase1/db_append.py
+structured_output.txt

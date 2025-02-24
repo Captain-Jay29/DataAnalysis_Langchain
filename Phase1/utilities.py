@@ -61,11 +61,12 @@ def check_duplicate_article(url: str) -> bool:
 # -------------------------------
 # Function: query_database_by_tags
 # -------------------------------
-def query_database_by_tags(tags: List[str]) -> List[dict]:
+def query_database_by_tags(query_tags: List[str], min_matches: int = 4) -> List[dict]:
     """
     Query the PostgreSQL database for articles with overlapping tags.
     
     It retrieves articles where the 'tags' column overlaps with the provided list using the PostgreSQL '&&' operator.
+    Then, it filters the results to only include articles that have at least `min_matches` matching tags with the query_tags.
     
     Returns a list of dictionaries containing:
         - url
@@ -74,6 +75,10 @@ def query_database_by_tags(tags: List[str]) -> List[dict]:
         - tags
         - retrieval_timestamp
     """
+    import os
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+
     DB_NAME = os.getenv("DB_NAME", "agentic_analysis")
     DB_USER = os.getenv("DB_USER", "jay")
     DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -84,10 +89,16 @@ def query_database_by_tags(tags: List[str]) -> List[dict]:
     try:
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, host=DB_HOST, port=DB_PORT)
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("SELECT url, summary, query, tags, retrieval_timestamp FROM articles WHERE tags && %s", (tags,))
+        # First, fetch articles with any overlapping tags using the && operator
+        cur.execute("SELECT url, summary, query, tags, retrieval_timestamp FROM articles WHERE tags && %s", (query_tags,))
         rows = cur.fetchall()
-        results = [dict(row) for row in rows]
         cur.close()
+        # Now, filter articles to require at least `min_matches` common tags.
+        for row in rows:
+            article_tags = set(row.get("tags", []))
+            common_tags = article_tags.intersection(query_tags)
+            if len(common_tags) >= min_matches:
+                results.append(dict(row))
     except Exception as e:
         print(f"Error querying database by tags: {e}")
     finally:
