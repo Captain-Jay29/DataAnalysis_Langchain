@@ -52,6 +52,7 @@ def generate_analysis_report(context: str, query: str, extra_instructions: str =
     4. **Conclusion:** Summarize the overall insights and propose actionable recommendations or considerations.
 
     Ensure that the report is clear, logically organized, and written in a tone appropriate for strategic decision-making rather than journalistic reporting.
+    Ensure that the report includes all sections as described and do not shorten the output to only a final summary.
     """
     # Append any extra instructions if provided
     prompt = base_prompt + "\n" + extra_instructions if extra_instructions else base_prompt

@@ -1,0 +1,7 @@
+[theme]
+base = "light"
+primaryColor = "#28A745"  # Green for buttons and accents
+backgroundColor = "#FFFFFF"  # White background
+secondaryBackgroundColor = "#F0FFF0"  # Honeydew for sidebar and report
+textColor = "#000000"  # Black text for readability
+font = "sans serif"

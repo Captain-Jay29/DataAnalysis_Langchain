@@ -4,11 +4,31 @@ import os
 import logging
 from langchain.agents import initialize_agent, Tool, AgentType
 from langchain_openai import ChatOpenAI
-from report_generator import generate_report_for_query  # Make sure this accepts an extra_instructions parameter
+from report_generator import generate_report_for_query  # Ensure this accepts an extra_instructions parameter
 from openai import OpenAI  # Using OpenAI for dynamic instruction generation
+import io
+
+# Custom logging handler to capture logs for Streamlit
+class StreamlitHandler(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.logs = io.StringIO()
+    
+    def emit(self, record):
+        msg = self.format(record)
+        self.logs.write(msg + "\n")
+    
+    def get_logs(self):
+        return self.logs.getvalue()
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+streamlit_handler = StreamlitHandler()
+logging.getLogger().handlers = [streamlit_handler]
+logging.getLogger().setLevel(logging.INFO)
+logging.basicConfig(format="%(message)s")
+
+# Global variable for report output
+last_tool_output = None
 
 def generate_dynamic_instructions(query: str) -> str:
     """
@@ -56,7 +76,14 @@ def generate_report_tool(query: str) -> str:
     
     # Call the report generation function with the extra instructions.
     report = generate_report_for_query(query, extra_instructions=extra_instructions)
+
+    global last_tool_output
+    last_tool_output = report
+
     return report
+
+
+
 
 # Define the tool for the agent.
 tools = [
@@ -71,11 +98,22 @@ tools = [
     )
 ]
 
-def main():
+
+
+
+def run_agent(query: str) -> str:
+    """
+    Sets up the LangChain agent and runs it for the given query.
+    Returns the agent's response (the generated report).
+    """
+    global last_tool_output
+    streamlit_handler.logs.truncate(0)  # Clear previous logs
+    streamlit_handler.logs.seek(0)
+
     # Set up the ChatOpenAI model with appropriate API key.
     llm = ChatOpenAI(
         temperature=0.7,
-        model_name="gpt-4o",  # You can adjust this model name as needed.
+        model_name="gpt-4o",  # Adjust as needed.
         openai_api_key=os.environ.get("OPENAI_API_KEY")
     )
     
@@ -88,14 +126,28 @@ def main():
         handle_parsing_errors=True
     )
     
-    # Get the query from the user (in production this might be provided as a parameter).
+    # Run the agent and capture its full response
+    final_answer = agent.run(query)
+    
+    # Explicitly call the report generator tool to get the detailed report
+    detailed_report = last_tool_output if last_tool_output else generate_report_tool(query)
+    
+    # Combine the detailed report and final answer
+    combined_output = f"{detailed_report}\n\n### Final Recommendation\n{final_answer}"
+
+    return combined_output
+
+
+
+def get_logs():
+    return streamlit_handler.get_logs()
+
+def main():
     query = input("Enter your query for the agent: ").strip()
     if not query:
         logging.error("No query provided. Exiting.")
         return
-    
-    # Run the agent with the query.
-    response = agent.run(query)
+    response = run_agent(query)
     print("\nAgent Response:\n")
     print(response)
 

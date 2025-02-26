@@ -15,7 +15,9 @@ Core_Workflow/get_data.py
 Core_Workflow/data_processing.py
 Core_Workflow/output.txt
 Core_Workflow/misinformation_detection.py
-structured_output.txt
 Core_Workflow/get_data_and_summarize.py
 Core_Workflow/db_append.py
+
+dashboard/stock_test.py
+
 structured_output.txt
