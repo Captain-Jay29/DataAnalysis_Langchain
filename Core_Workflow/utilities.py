@@ -1,6 +1,5 @@
 # File: utilities.py
 
-import re
 from typing import List
 import os
 import psycopg2

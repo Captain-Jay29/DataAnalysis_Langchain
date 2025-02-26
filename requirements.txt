@@ -1,0 +1,13 @@
+langchain==0.0.148
+langchain_openai==0.0.2
+openai==0.27.8
+torch==1.13.1
+transformers==4.27.0
+requests==2.31.0
+googlesearch-python==1.1.0
+beautifulsoup4==4.12.2
+python-dotenv==0.21.0
+nltk==3.7
+psycopg2-binary==2.9.5
+keybert==0.9.5
+streamlit==1.16.0

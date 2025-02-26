@@ -27,7 +27,6 @@ Each result is a dictionary:
 import os
 import re
 import html
-import traceback
 import requests
 from urllib.parse import quote
 from googlesearch import search

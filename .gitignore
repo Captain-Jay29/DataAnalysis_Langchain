@@ -17,6 +17,7 @@ Core_Workflow/output.txt
 Core_Workflow/misinformation_detection.py
 Core_Workflow/get_data_and_summarize.py
 Core_Workflow/db_append.py
+Core_Workflow/agent_orchestrator.py
 
 dashboard/stock_test.py
 
