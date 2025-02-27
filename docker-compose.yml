@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DB_NAME=agentic_analysis
+      - DB_USER=jay
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=agentic_analysis
+      - POSTGRES_USER=jay
+      - POSTGRES_PASSWORD=yourpassword
+    ports:
+      - "5432:5432"
