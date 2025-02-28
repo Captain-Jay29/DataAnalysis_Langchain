@@ -5,15 +5,17 @@ FROM python:3.9-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# Install Git
+RUN apt-get update && apt-get install -y git
+
 # Set working directory in the container
 WORKDIR /app
 
-# Copy requirements file and install dependencies
-COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Clone the Git repository
+RUN git clone https://github.com/Captain-Jay29/DataAnalysis_Langchain.git .
 
-# Copy the rest of the project files
-COPY . /app/
+# Install dependencies
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Expose the port Streamlit uses (default: 8501)
 EXPOSE 8501

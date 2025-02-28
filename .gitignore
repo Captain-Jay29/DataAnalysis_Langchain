@@ -3,6 +3,7 @@ __pycache__/
 db.txt
 agentic/
 spacy-env
+Papers
 
 Core_Workflow/scrapers_old/
 Core_Workflow/test
